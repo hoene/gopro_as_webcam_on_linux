@@ -394,8 +394,15 @@ function expose_device {
 
 function start_preview {
 
-    echo -e "To test this try this command(vlc needs to be installed): \n"
-    sudo -u $GOPRO_USER vlc -vvv --network-caching=300 --sout-x264-preset=ultrafast --sout-x264-tune=zerolatency --sout-x264-vbv-bufsize 0 --sout-transcode-threads 4 --no-audio udp://@:8554
+    FILENAME=/home/tooling/Videos/gopro_${VEHICLE_ID}_`date +%Y-%m-%d_%H-%M-%S`.mpg
+    echo -e "To test this try this command(vlc needs to be installed). Video will be written to $FILENAME \n"
+    sudo -u $GOPRO_USER vlc -I dummy --sout "#duplicate{dst=display{noaudio},dst=standard{access=file,mux=ts,dst=$FILENAME}" --video-on-top --no-video-deco --no-embedded-video  --network-caching=300 --sout-x264-preset=ultrafast --sout-x264-tune=zerolatency --sout-x264-vbv-bufsize 0 --sout-transcode-threads 4 --no-audio udp://@:8554 >/dev/null &
+    PID=$! 
+    sleep 2
+    echo RESIZING VID window with ID $ID
+    wmctrl -r "VLC media player"  -b remove,maximized_vert,maximized_horz
+    wmctrl -r "VLC media player"  -b remove,maximized_vert,maximized_horz -e 0,1440,0,710,400
+    wait $PID
 }
 
 function info_only {
